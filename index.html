@@ -6,9 +6,39 @@
     <meta name="viewport" content="user-scalable=0" />
     <link rel="stylesheet" type="text/css" href="./resource/CSS/main.css">
 </head>
+
 <body>
+	<div id="frame">
+		<div id="open">
+			<p id="title">city bloxx</p>
+			<div class="start" id="p-1" hidden>继续建造城市</div>
+			<div class="start" id="p0">新建城市</div>
+			<div class="start" id="p1">快速游戏</div>
+			<div class="start" id="p2">高分榜</div>
+			<div class="start" id="p3">帮助</div>
+		</div>
+		<div id="info"  hidden>
+		</div>
+		
+		<div id="score" hidden>
+			<div class="mediumTitle">最好成绩</div>
+			<div class="smallTitle">城市模式</div>
+			<div class="rank" id="citymax">最高分：0</div>
+			<div class="smallTitle">快速模式</div>
+			<div class="rank" id="q0">第1名：人口：0 层数：0</div>
+			<div class="rank" id="q1">第2名：人口：0 层数：0</div>
+			<div class="rank" id="q2">第3名：人口：0 层数：0</div>
+		</div>
+
+		<div id="foot" hidden>
+				按下空格键返回上级
+		</div>
+	</div>
+
+	<canvas id="mainCanvas"></canvas>
 
 </body>
+
 <footer>
     <script src="./resource/JS/main.js" type="text/javascript"></script>
 </footer>

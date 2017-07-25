@@ -9,3 +9,42 @@ html,body {
     width: 100%;
     overflow: hidden;
 }
+
+#frame{
+	background-color: #87CEFA;
+	position: absolute;
+	height: 60%;
+	width: 20%;
+	top: 20%; 
+	left: 40%; 
+	border: 2px solid #000000;
+	z-index: 1;
+}
+
+#title{
+	margin-top:40%;
+	font-size: 3vw;
+}
+
+
+.start{
+	margin-left:10%;
+	font-size: 1.5vw;
+}
+
+.selected{
+	background-color: yellow;
+	color: red;
+	font-style: strong;
+	font-weight: bold;
+	font-size: 1.5vw;
+}
+
+#info{
+	position:absolute;
+}
+
+#foot{
+	position:absolute;
+	bottom: 0;
+}
