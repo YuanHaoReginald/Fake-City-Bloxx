@@ -217,7 +217,7 @@
                     this.Damage(floor);
                     if (!LifeManager.loseLife()){
                         GenerateManager.GenerateCube();
-                    }GenerateManager.GenerateCube();
+                    }
                 } else if (floor + 1 < this.Building.length && floor >= -1
                 && Math.abs(this.Building[floor + 1].position.x - fallingCube.position.x) < 10
                 && Math.abs(this.Building[floor + 1].position.z - fallingCube.position.z) < 10){
@@ -231,6 +231,10 @@
         Damage : function (index) {
             if(index === 0)
                 index = 1;
+            while(index < this.Building.length && this.Building[index].position.x ===
+                this.Building[index - 1].position.x){
+                index += 1;
+            }
             console.log(index, this.Building.length);
             TotalHeight -= this.Building.length - index;
             camera.position.z -= 10 * (this.Building.length - index);
