@@ -8,6 +8,7 @@
     let TotalHeight = 0, MaxCombo = 0, TotalPeople = 0;
     let mode, isGod;
     let planeFloor, planeWall;
+    let isGolden = false;
 
     let life_c = window.document.getElementById("LifeCanvas");
     let life_ctx = life_c.getContext('2d');
@@ -202,6 +203,7 @@
                         this.Building[0] = fallingCube;
                         fallingCube.position.z = 5;
                         TotalHeight += 1;
+                        this.CalculateScore(5);
                         camera.position.z += 10;
                         planeWall.position.z += 10;
                         FallManager.Reset();
@@ -221,6 +223,7 @@
                             fallingCube.position.z = 10 * TotalHeight + 5;
                             ComboManager.CheckCombo(distance === 0);
                             TotalHeight += 1;
+                            this.CalculateScore(distance);
                             camera.position.z += 10;
                             planeWall.position.z += 10;
                             FallManager.Reset();
@@ -263,14 +266,32 @@
             TotalHeight -= this.Building.length - index;
             camera.position.z -= 10 * (this.Building.length - index);
             planeWall.position.z -= 10 * (this.Building.length - index);
-            for(let i = index; i < this.Building.length; ++i)
+            for(let i = index; i < this.Building.length; ++i){
                 scene.remove(this.Building[i]);
+                TotalHeight -= this.score[i];
+            }
             this.Building.splice(index, this.Building.length - index);
             scene.remove(FallManager.myCube);
             FallManager.Reset();
         },
-        CalculateScore : function () {
-            //TODO
+        CalculateScore : function (distance) {
+            if(TotalHeight === 10 * mode){
+                const RoofPeople = [34, 46, 68, 136];
+                const GoldenPeople = [68, 132, 196, 260];
+                TotalPeople += Math.floor((isGolden ? GoldenPeople[mode - 1] : RoofPeople[mode - 1]) *
+                    (1 - distance / 5));
+            } else {
+                let type = 4 - distance;
+                if(type === 2 || type === 1)
+                    type = 2;
+                else if (type === 0)
+                    type = 1;
+                else if(type === -1)
+                    type = 0;
+                let score = type + Math.floor(TotalHeight / 10);
+                this.score.push(score);
+                TotalPeople += score;
+            }
         },
         Reset : function () {
             for(let i = 0; i < this.Building.length; ++i)
