@@ -1,17 +1,23 @@
 // import * as THREE from "three";
 
-(function (window) {
-    let InBuild = false;
-    let renderer, camera, scene, light, controls;
+// (function (window) {
+    let InBuild = true;
+    let renderer, camera, scene, light;
     let width = document.getElementById('canvas-frame').clientWidth;
     let height = document.getElementById('canvas-frame').clientHeight;
     let TotalHeight = 0, MaxCombo = 0, TotalPeople = 0;
+    let mode, isGod;
+    let planeFloor, planeWall;
+    const CubeColor = ["#EEAD0E", "#00BFFF", "#FF3030", "#00EE00", "#EEEE00"];
 
-    function BuildTower() {
+    function BuildTower(mode_var, isGod_var) {
+        mode = mode_var || 1;
+        isGod = (isGod_var === true);
         InBuild = true;
+        GenerateManager.initCube();
         document.getElementById("canvas-frame").style.visibility = "visible";
     }
-    
+
     function EndBuildTower() {
         document.getElementById("canvas-frame").style.visibility = "hidden";
         console.log("Finish Building");
@@ -25,56 +31,39 @@
             });
             renderer.setSize(width, height);
             document.getElementById('canvas-frame').appendChild(renderer.domElement);
-            // renderer.setClearColor(0xFFFFFF, 1.0);
         },
         initCamera : function() {
             camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
             camera.position.x = 0;
             camera.position.y = 100;
-            camera.position.z = 0;
+            camera.position.z = 30;
             camera.up.x = 0;
             camera.up.y = 0;
             camera.up.z = 1;
             camera.lookAt({
                 x : 0,
                 y : 0,
-                z : 0
+                z : 30,
             });
-            camera.position.z = 30;
         },
         initScene : function() {
             scene = new THREE.Scene();
         },
         initLight : function() {
-            light = new THREE.AmbientLight(0xFF0000);
+            light = new THREE.AmbientLight(0xFFFFFF);
             scene.add(light);
         },
         initObject : function() {
-            let geometry = new THREE.Geometry();
-            let material = new THREE.LineBasicMaterial( { vertexColors: THREE.VertexColors} );
-            let color1 = new THREE.Color( 0x0000CD), color2 = new THREE.Color( 0xFF0000 );
-
-            // 线的材质可以由2点的颜色决定
-            let p1 = new THREE.Vector3( -10, 0, 10 );
-            let p2 = new THREE.Vector3(  10, 0, 20 );
-            geometry.vertices.push(p1);
-            geometry.vertices.push(p2);
-            geometry.colors.push( color1, color2 );
-
-            let line = new THREE.Line( geometry, material, THREE.LineSegments );
-            scene.add(line);
-
-            let planeGeometryFloor = new THREE.PlaneGeometry(400, 200);
+            let planeGeometryFloor = new THREE.PlaneGeometry(1600, 1000);
             let planeMaterialFloor = new THREE.MeshBasicMaterial({color: 0xcccccc});
-            let planeFloor = new THREE.Mesh(planeGeometryFloor, planeMaterialFloor);
-            planeFloor.position.y = 50;
+            planeFloor = new THREE.Mesh(planeGeometryFloor, planeMaterialFloor);
             scene.add(planeFloor);
 
-            let planeGeometryWall = new THREE.PlaneGeometry(400, 1000);
+            let planeGeometryWall = new THREE.PlaneGeometry(1600, 1600);
             let planeMaterialWall = new THREE.MeshBasicMaterial({color: 0x87CEFF});
-            let planeWall = new THREE.Mesh(planeGeometryWall, planeMaterialWall);
+            planeWall = new THREE.Mesh(planeGeometryWall, planeMaterialWall);
             planeWall.rotation.x = -0.5 * Math.PI;
-            planeWall.position.y = -50;
+            planeWall.position.y = -500;
             planeWall.position.z = 500;
             scene.add(planeWall);
         },
@@ -85,46 +74,108 @@
             this.initLight();
             this.initObject();
 
-            //测试代码
-            controls = new THREE.TrackballControls( camera );
-            controls.rotateSpeed = 1.0;
-            controls.zoomSpeed = 1.2;
-            controls.panSpeed = 0.8;
-            controls.noZoom = false;
-            controls.noPan = false;
-            controls.staticMoving = true;
-            controls.dynamicDampingFactor = 0.3;
-            controls.keys = [ 65, 83, 68 ];
-            controls.addEventListener( 'change', render );
             animate();
-            //测试结束
-
-            render();
         },
     };
 
-    function render() {
-        renderer.clear();
-        renderer.render(scene, camera);
-        requestAnimationFrame(render);
-    }
+    let GenerateManager = {
+        myCube : undefined,
+        geometry : undefined,
+        meshFaceMaterial : undefined,
+        arg : 0,
+        point : true,
+        initCube : function () {
+            this.geometry = new THREE.CubeGeometry(10, 10, 10);
+            let texture_main = new THREE.Texture(generateTexture(CubeColor[mode]));
+            texture_main.needsUpdate = true;
+            let texture_side = new THREE.Texture(generateTexture("#000000"));
+            texture_side.needsUpdate = true;
+            let texture_button = new THREE.Texture(generateTexture("#FFFFFF"));
+            texture_button.needsUpdate = true;
+            let materials = [];
+            materials.push(new THREE.MeshBasicMaterial({map:texture_side}));
+            materials.push(new THREE.MeshBasicMaterial({map:texture_side}));
+            materials.push(new THREE.MeshBasicMaterial({map:texture_main}));
+            materials.push(new THREE.MeshBasicMaterial({map:texture_main}));
+            materials.push(new THREE.MeshBasicMaterial({map:texture_button}));
+            materials.push(new THREE.MeshBasicMaterial({map:texture_button}));
+            this.meshFaceMaterial = new THREE.MeshFaceMaterial( materials );
+        },
+        GenerateCube : function() {
+            this.myCube = new THREE.Mesh(this.geometry, this.meshFaceMaterial );
+            this.myCube.position.z = TotalHeight * 10 + 35;
+            scene.add(this.myCube);
+        },
+        Reset : function () {
+            scene.remove(this.myCube);
+            this.myCube = undefined;
+            this.arg = 0;
+            this.point = true;
+        },
+        move : function () {
+            if(typeof this.myCube !== 'undefined') {
+                this.arg += this.point ? 1 : -1;
+                if (this.arg === 30 || this.arg === -30)
+                    this.point = !this.point;
+                this.myCube.rotation.y = -this.arg * Math.PI / 360;
+                this.myCube.position.x = 50 * Math.sin(this.arg * Math.PI / 360);
+                this.myCube.position.z = 85 - 50 * Math.cos(this.arg * Math.PI / 360);
+            }
+        }
+    };
 
     function animate() {
+        GenerateManager.move();
+
+        render();
         requestAnimationFrame( animate );
-        controls.update();
     }
 
-    window.addEventListener( 'resize', onWindowResize, false );
+    function render() {
+        renderer.render( scene, camera );
+    }
 
+    window.onkeydown = function (event) {
+        if(InBuild){
+            if(37 <= event.keyCode <= 40){
+                // planeWall.position.z += 100;
+                switch (event.keyCode){
+                    case 37:
+                        camera.position.x += 10;
+                        break;
+                    case 38:
+                        camera.position.z += 10;
+                        break;
+                    case 39:
+                        camera.position.x -= 10;
+                        break;
+                    case 40:
+                        camera.position.z -= 10;
+                        break;
+                }
+            }
+        }
+    };
+
+
+
+    //以下非正式代码
+    window.addEventListener( 'resize', onWindowResize, false );
     function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize( window.innerWidth, window.innerHeight );
-        controls.handleResize();
         render();
     }
     EnvironmentManager.threeStart();
 
-    window.EndBuildTower = EndBuildTower;
-    window.BuildTower = BuildTower;
-})(window);
+    function generateTexture(color) {
+        let canvas = document.createElement( 'canvas' );
+        canvas.width = canvas.height = 8;
+        let context = canvas.getContext( '2d' );
+        context.fillStyle = color;
+        context.fillRect(0, 0, 8, 8);
+        return canvas;
+    }
+
+// })(window);
