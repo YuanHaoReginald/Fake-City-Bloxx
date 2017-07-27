@@ -9,6 +9,9 @@
     let mode, isGod;
     let planeFloor, planeWall;
 
+    let life_c = window.document.getElementById("LifeCanvas");
+    let life_ctx = life_c.getContext('2d');
+
     const CubeColor = ["#EEAD0E", "#00BFFF", "#FF3030", "#00EE00", "#EEEE00"];
 
     function BuildTower(mode_var, isGod_var) {
@@ -16,11 +19,13 @@
         isGod = (isGod_var === true);
         InBuild = true;
         GenerateManager.initCube();
+        LifeManager.initLife();
+        LifeManager.Paint();
         document.getElementById("canvas-frame").style.visibility = "visible";
     }
 
     function EndBuildTower() {
-        document.getElementById("canvas-frame").style.visibility = "hidden";
+        // document.getElementById("canvas-frame").style.visibility = "hidden";
         console.log("Finish Building");
         InBuild = false;
     }
@@ -32,6 +37,7 @@
             });
             renderer.setSize(width, height);
             document.getElementById('canvas-frame').appendChild(renderer.domElement);
+            renderer.domElement.style.zIndex = 0;
         },
         initCamera : function() {
             camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
@@ -156,7 +162,9 @@
             if(this.myCube.position.z < 10 * TotalHeight - 35){
                 scene.remove(this.myCube);
                 this.Reset();
-                GenerateManager.GenerateCube();
+                if (!LifeManager.loseLife()){
+                    GenerateManager.GenerateCube();
+                }
             }
         }
     };
@@ -195,7 +203,9 @@
                             GenerateManager.GenerateCube();
                         } else {
                             this.Damage(this.Building.length - 1);
-                            GenerateManager.GenerateCube();
+                            if (!LifeManager.loseLife()){
+                                GenerateManager.GenerateCube();
+                            }
                         }
                     }
                 }
@@ -205,12 +215,16 @@
                     && Math.abs(this.Building[floor].position.x - fallingCube.position.x) < 10
                     && Math.abs(this.Building[floor].position.z - fallingCube.position.z) < 10){
                     this.Damage(floor);
-                    GenerateManager.GenerateCube();
+                    if (!LifeManager.loseLife()){
+                        GenerateManager.GenerateCube();
+                    }GenerateManager.GenerateCube();
                 } else if (floor + 1 < this.Building.length && floor >= -1
                 && Math.abs(this.Building[floor + 1].position.x - fallingCube.position.x) < 10
                 && Math.abs(this.Building[floor + 1].position.z - fallingCube.position.z) < 10){
                     this.Damage(floor + 1);
-                    GenerateManager.GenerateCube();
+                    if (!LifeManager.loseLife()){
+                        GenerateManager.GenerateCube();
+                    }
                 }
             }
         },
@@ -228,7 +242,7 @@
             FallManager.Reset();
         },
         CalculateScore : function () {
-
+            //TODO
         },
         Reset : function () {
             for(let i = 0; i < this.Building.length; ++i)
@@ -237,6 +251,69 @@
             this.score = [];
         }
     };
+
+    let LifeManager = {
+        life : 0,
+        initLife : function () {
+            if(isGod)
+                this.life = -1;
+            else
+                this.life = 3;
+        },
+        Reset : function () {
+            this.life = 0;
+        },
+        Paint : function () {
+            if(!isGod){
+                life_ctx.clearRect(0, 0, life_c.width, life_c.height);
+                let RectLength = life_c.height / 30;
+                life_ctx.fillStyle = CubeColor[mode];
+                life_ctx.strokeStyle = "#000000";
+                life_ctx.lineWidth = 1;
+                PaintRect(life_ctx, 3 * RectLength, life_c.height - 5 * RectLength
+                    , RectLength, RectLength, this.life >= 3);
+                PaintRect(life_ctx, 3 * RectLength, life_c.height - 4 * RectLength
+                    , RectLength, RectLength, this.life >= 2);
+                PaintRect(life_ctx, 3 * RectLength, life_c.height - 3 * RectLength
+                    , RectLength, RectLength, this.life >= 1);
+            }
+        },
+        loseLife : function () {
+            if(this.life !== -1){
+                this.life -= 1;
+                this.Paint();
+                if(this.life === 0)
+                {
+                    EndBuildTower();
+                    return true;
+                }
+                return false;
+            }
+        }
+    };
+
+
+
+    function ResizeScreen() {
+        let width = document.getElementById("canvas-frame").getBoundingClientRect().width;
+        let height = document.getElementById("canvas-frame").getBoundingClientRect().height;
+        life_c.width = width;
+        life_c.height = height;
+    }
+    
+    function PaintRect(ctx, x, y, width, height, fill) {
+        if(fill === true)
+            ctx.fillRect(x, y, width, height);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y + height);
+        ctx.lineTo(x + width, y + height);
+        ctx.lineTo(x + width, y);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.closePath();
+    }
+
 
     function animate() {
         GenerateManager.move();
@@ -287,9 +364,13 @@
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize( window.innerWidth, window.innerHeight );
+        ResizeScreen();
+        LifeManager.Paint();
         render();
     }
     EnvironmentManager.threeStart();
+    ResizeScreen();
+    LifeManager.Paint();
 
     function generateTexture(color) {
         let canvas = document.createElement( 'canvas' );
