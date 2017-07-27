@@ -115,9 +115,17 @@
             if(TotalHeight === mode * 10 - 1){
                 let roof_geometry  = new THREE.CylinderGeometry(0, 5 * Math.sqrt(2), 10, 4);
                 let roof_materials = [];
-                roof_materials.push(new THREE.MeshBasicMaterial({color: CubeColor[mode]}));//白
-                roof_materials.push(new THREE.MeshBasicMaterial({color: "#000000"}));//黑
-                roof_materials.push(new THREE.MeshBasicMaterial({color: "#000000"}));//蓝
+                const line = [70, 450, 1300, 3000];
+                if(TotalPeople >= line[mode - 1]){
+                    isGolden = true;
+                }
+                if(isGolden){
+                    roof_materials.push(new THREE.MeshBasicMaterial({color: '#FFD700'}));
+                } else {
+                    roof_materials.push(new THREE.MeshBasicMaterial({color: CubeColor[mode]}));
+                }
+                roof_materials.push(new THREE.MeshBasicMaterial({color: "#000000"}));
+                roof_materials.push(new THREE.MeshBasicMaterial({color: "#000000"}));
                 let roof_meshFaceMaterial = new THREE.MeshFaceMaterial( roof_materials );
                 this.myCube = new THREE.Mesh(roof_geometry, roof_meshFaceMaterial);
                 this.myCube.position.z = TotalHeight * 10 + 35;
@@ -187,6 +195,7 @@
                 scene.remove(this.myCube);
                 if(ComboManager.comboTime > 0)
                     ComboManager.EndCombo();
+                isGolden = false;
                 this.Reset();
                 if (!LifeManager.loseLife()){
                     GenerateManager.GenerateCube();
@@ -233,6 +242,7 @@
                         } else {
                             if(ComboManager.comboTime > 0)
                                 ComboManager.EndCombo();
+                            isGolden = false;
                             this.Damage(this.Building.length - 1);
                             if (!LifeManager.loseLife()){
                                 GenerateManager.GenerateCube();
@@ -247,6 +257,7 @@
                     && Math.abs(this.Building[floor].position.z - fallingCube.position.z) < 10){
                     if(ComboManager.comboTime > 0)
                         ComboManager.EndCombo();
+                    isGolden = false;
                     this.Damage(floor);
                     if (!LifeManager.loseLife()){
                         GenerateManager.GenerateCube();
@@ -256,6 +267,7 @@
                     && Math.abs(this.Building[floor + 1].position.z - fallingCube.position.z) < 10){
                     if(ComboManager.comboTime > 0)
                         ComboManager.EndCombo();
+                    isGolden = false;
                     this.Damage(floor + 1);
                     if (!LifeManager.loseLife()){
                         GenerateManager.GenerateCube();
