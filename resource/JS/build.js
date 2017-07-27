@@ -111,8 +111,21 @@
             this.meshFaceMaterial = new THREE.MeshFaceMaterial( materials );
         },
         GenerateCube : function() {
-            this.myCube = new THREE.Mesh(this.geometry, this.meshFaceMaterial );
-            this.myCube.position.z = TotalHeight * 10 + 35;
+            if(TotalHeight === mode * 10 - 1){
+                let roof_geometry  = new THREE.CylinderGeometry(0, 5 * Math.sqrt(2), 10, 4);
+                let roof_materials = [];
+                roof_materials.push(new THREE.MeshBasicMaterial({color: CubeColor[mode]}));//白
+                roof_materials.push(new THREE.MeshBasicMaterial({color: "#000000"}));//黑
+                roof_materials.push(new THREE.MeshBasicMaterial({color: "#000000"}));//蓝
+                let roof_meshFaceMaterial = new THREE.MeshFaceMaterial( roof_materials );
+                this.myCube = new THREE.Mesh(roof_geometry, roof_meshFaceMaterial);
+                this.myCube.position.z = TotalHeight * 10 + 35;
+                this.myCube.rotation.x = Math.PI / 2;
+                this.myCube.rotation.y = Math.PI / 4;
+            } else {
+                this.myCube = new THREE.Mesh(this.geometry, this.meshFaceMaterial );
+                this.myCube.position.z = TotalHeight * 10 + 35;
+            }
             scene.add(this.myCube);
         },
         Reset : function () {
@@ -126,7 +139,11 @@
                 this.arg += this.point ? 1 : -1;
                 if (this.arg === 30 || this.arg === -30)
                     this.point = !this.point;
-                this.myCube.rotation.y = -this.arg * Math.PI / 360;
+                if(TotalHeight === mode * 10 - 1){
+                    this.myCube.rotation.z = this.arg * Math.PI / 360;
+                } else {
+                    this.myCube.rotation.y = -this.arg * Math.PI / 360;
+                }
                 this.myCube.position.x = 50 * Math.sin(this.arg * Math.PI / 360);
                 this.myCube.position.z = TotalHeight * 10 + 85 - 50 * Math.cos(this.arg * Math.PI / 360);
             }
@@ -146,7 +163,11 @@
                 this.myCube.position.x += this.speed;
                 if(this.arg !== 0){
                     this.arg += (this.arg > 0) ? -1 : 1;
-                    this.myCube.rotation.y = -this.arg * Math.PI / 360;
+                    if(TotalHeight === mode * 10 - 1){
+                        this.myCube.rotation.z = this.arg * Math.PI / 360;
+                    } else {
+                        this.myCube.rotation.y = -this.arg * Math.PI / 360;
+                    }
                 }
                 TowerManager.CheckFall(this.myCube);
                 if(this.myCube !== undefined)
@@ -432,8 +453,6 @@
     };
 
 
-
-    //以下非正式代码
     window.addEventListener( 'resize', onWindowResize, false );
     function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
