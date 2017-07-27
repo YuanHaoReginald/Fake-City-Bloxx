@@ -28,3 +28,7 @@ div#canvas-frame {
 #ComboCanvas{
     z-index: 5;
 }
+
+#HeightCanvas{
+    z-index: 5;
+}

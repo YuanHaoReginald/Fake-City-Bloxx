@@ -14,6 +14,8 @@
     let life_ctx = life_c.getContext('2d');
     let combo_c = window.document.getElementById("ComboCanvas");
     let combo_ctx = combo_c.getContext('2d');
+    let height_c = window.document.getElementById("HeightCanvas");
+    let height_ctx = height_c.getContext('2d');
 
     const CubeColor = ["#EEAD0E", "#00BFFF", "#FF3030", "#00EE00", "#EEEE00"];
 
@@ -214,6 +216,7 @@
                         this.Building[0] = fallingCube;
                         fallingCube.position.z = 5;
                         TotalHeight += 1;
+                        HeightManager.Paint();
                         this.CalculateScore(5);
                         camera.position.z += 10;
                         planeWall.position.z += 10;
@@ -234,6 +237,7 @@
                             fallingCube.position.z = 10 * TotalHeight + 5;
                             ComboManager.CheckCombo(distance === 0);
                             TotalHeight += 1;
+                            HeightManager.Paint();
                             this.CalculateScore(distance);
                             camera.position.z += 10;
                             planeWall.position.z += 10;
@@ -284,6 +288,7 @@
             }
             console.log(index, this.Building.length);
             TotalHeight -= this.Building.length - index;
+            HeightManager.Paint();
             camera.position.z -= 10 * (this.Building.length - index);
             planeWall.position.z -= 10 * (this.Building.length - index);
             for(let i = index; i < this.Building.length; ++i){
@@ -430,6 +435,35 @@
         }
     };
 
+    let HeightManager = {
+        Paint : function () {
+            height_ctx.clearRect(0, 0, height_c.width, height_c.height);
+            let RectLength = height_c.height / 30;
+            height_ctx.fillStyle = CubeColor[mode];
+            height_ctx.strokeStyle = "#000000";
+            height_ctx.lineWidth = 1;
+            if(mode === 0){
+                height_ctx.fillRect(RectLength, height_c.height - 7 * RectLength
+                    , RectLength, 5 * RectLength);
+            }else{
+                height_ctx.fillRect(RectLength
+                    , height_c.height - 7 * RectLength + (1 - TotalHeight / (mode * 10)) * 5 * RectLength
+                    , RectLength, TotalHeight / (mode * 10) * 5 * RectLength);
+            }
+            height_ctx.beginPath();
+            height_ctx.moveTo(RectLength, height_c.height - 7 * RectLength);
+            height_ctx.lineTo(2 * RectLength, height_c.height - 7 * RectLength);
+            height_ctx.lineTo(2 * RectLength, height_c.height - 2 * RectLength);
+            height_ctx.lineTo(RectLength, height_c.height - 2 * RectLength);
+            height_ctx.lineTo(RectLength, height_c.height - 7 * RectLength);
+            height_ctx.stroke();
+            height_ctx.closePath();
+            height_ctx.fillStyle = "#000000";
+            height_ctx.font = String(RectLength) + "px Arial";
+            height_ctx.fillText(TotalHeight.toString(), RectLength,
+                height_c.height - 8 * RectLength)
+        }
+    };
 
 
     function ResizeScreen() {
@@ -439,6 +473,8 @@
         life_c.height = height;
         combo_c.width = width;
         combo_c.height = height;
+        height_c.width = width;
+        height_c.height = height;
     }
     
     function PaintRect(ctx, x, y, width, height, fill) {
@@ -505,11 +541,13 @@
         ResizeScreen();
         LifeManager.Paint();
         ComboManager.Paint();
+        HeightManager.Paint();
         render();
     }
     EnvironmentManager.threeStart();
     ResizeScreen();
     LifeManager.Paint();
+    HeightManager.Paint();
 
     function generateTexture(color) {
         let canvas = document.createElement( 'canvas' );
