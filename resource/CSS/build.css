@@ -24,3 +24,7 @@ div#canvas-frame {
 #LifeCanvas {
     z-index: 5;
 }
+
+#ComboCanvas{
+    z-index: 5;
+}

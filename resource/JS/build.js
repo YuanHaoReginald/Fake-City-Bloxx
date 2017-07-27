@@ -11,6 +11,8 @@
 
     let life_c = window.document.getElementById("LifeCanvas");
     let life_ctx = life_c.getContext('2d');
+    let combo_c = window.document.getElementById("ComboCanvas");
+    let combo_ctx = combo_c.getContext('2d');
 
     const CubeColor = ["#EEAD0E", "#00BFFF", "#FF3030", "#00EE00", "#EEEE00"];
 
@@ -196,6 +198,7 @@
                                 + distance;
                             this.Building[this.Building.length] = fallingCube;
                             fallingCube.position.z = 10 * TotalHeight + 5;
+                            ComboManager.CheckCombo(distance === 0);
                             TotalHeight += 1;
                             camera.position.z += 10;
                             planeWall.position.z += 10;
@@ -296,6 +299,71 @@
         }
     };
 
+    let ComboManager = {
+        comboTime : 0,
+        comboScore : 0,
+        comboNumber : 0,
+        comboInterval : undefined,
+        Reset : function () {
+            this.comboTime = 0;
+            this.comboScore = 0;
+            this.comboNumber = 0;
+            this.comboInterval = undefined;
+        },
+        BeginCombo : function () {
+            this.comboTime = 7000;
+            if(this.comboInterval !== undefined)
+                clearInterval(this.comboInterval);
+            this.comboInterval = setInterval(() => {
+                this.comboTime -= 50 * Math.min(5, (this.comboNumber + 1) / 2);
+                this.Paint();
+                if(this.comboTime <= 0){
+                    this.EndCombo();
+                }
+            }, 50)
+        },
+        Paint : function (clear) {
+            combo_ctx.clearRect(0, 0, combo_c.width, combo_c.height);
+            if(clear === true)
+                return;
+            let width = combo_c.height / 3;
+            let height = combo_c.height / 30;
+            let real_width = width * (this.comboTime > 0 ? this.comboTime : 0) / 7000;
+            // console.log(real_width);
+            combo_ctx.fillStyle = "#FFFF00";
+            combo_ctx.strokeStyle = "#000000";
+            combo_ctx.lineWidth = 1;
+            combo_ctx.fillRect(combo_c.width / 2 - width / 2, combo_c.height / 6, real_width, height);
+            combo_ctx.beginPath();
+            combo_ctx.moveTo(combo_c.width / 2 - width / 2, combo_c.height / 6);
+            combo_ctx.lineTo(combo_c.width / 2 + width / 2, combo_c.height / 6);
+            combo_ctx.lineTo(combo_c.width / 2 + width / 2, combo_c.height / 6 + height);
+            combo_ctx.lineTo(combo_c.width / 2 - width / 2, combo_c.height / 6 + height);
+            combo_ctx.lineTo(combo_c.width / 2 - width / 2, combo_c.height / 6);
+            combo_ctx.stroke();
+            combo_ctx.closePath();
+            combo_ctx.font = String(height) + "px Arial";
+            combo_ctx.fillText("Combo " + this.comboNumber.toString(),
+                combo_c.width / 2 + width / 2 + height, combo_c.height / 6 + height)
+        },
+        CheckCombo : function (isPerfect) {
+            if(isPerfect === true){
+                this.comboNumber += 1;
+                this.comboScore += (Math.floor(TotalHeight / 10) * 2 + 2) * this.comboNumber;
+                this.BeginCombo();
+            } else if(this.comboTime > 0) {
+                this.comboNumber += 1;
+                this.comboScore += (Math.floor(TotalHeight / 10) * 2 + 2) * this.comboNumber;
+            }
+        },
+        EndCombo : function () {
+            clearInterval(this.comboInterval);
+            TotalPeople += this.comboScore;
+            this.Paint(true);
+            this.Reset();
+        }
+    };
+
 
 
     function ResizeScreen() {
@@ -303,6 +371,8 @@
         let height = document.getElementById("canvas-frame").getBoundingClientRect().height;
         life_c.width = width;
         life_c.height = height;
+        combo_c.width = width;
+        combo_c.height = height;
     }
     
     function PaintRect(ctx, x, y, width, height, fill) {
