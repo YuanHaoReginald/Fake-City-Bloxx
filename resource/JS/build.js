@@ -8,6 +8,7 @@
     let TotalHeight = 0, MaxCombo = 0, TotalPeople = 0;
     let mode, isGod;
     let planeFloor, planeWall;
+
     const CubeColor = ["#EEAD0E", "#00BFFF", "#FF3030", "#00EE00", "#EEEE00"];
 
     function BuildTower(mode_var, isGod_var) {
@@ -35,7 +36,7 @@
         initCamera : function() {
             camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
             camera.position.x = 0;
-            camera.position.y = 100;
+            camera.position.y = 150;
             camera.position.z = 30;
             camera.up.x = 0;
             camera.up.y = 0;
@@ -107,7 +108,7 @@
             scene.add(this.myCube);
         },
         Reset : function () {
-            scene.remove(this.myCube);
+            // scene.remove(this.myCube);
             this.myCube = undefined;
             this.arg = 0;
             this.point = true;
@@ -119,14 +120,127 @@
                     this.point = !this.point;
                 this.myCube.rotation.y = -this.arg * Math.PI / 360;
                 this.myCube.position.x = 50 * Math.sin(this.arg * Math.PI / 360);
-                this.myCube.position.z = 85 - 50 * Math.cos(this.arg * Math.PI / 360);
+                this.myCube.position.z = TotalHeight * 10 + 85 - 50 * Math.cos(this.arg * Math.PI / 360);
             }
+        }
+    };
+
+    let FallManager = {
+        myCube : undefined,
+        arg : 0,
+        speed : 0,
+        h_speed : 0,
+        canUse : true,
+        move : function () {
+            if(typeof this.myCube !== 'undefined'){
+                this.myCube.position.z -= this.h_speed;
+                this.h_speed += 0.05;
+                this.myCube.position.x += this.speed;
+                if(this.arg !== 0){
+                    this.arg += (this.arg > 0) ? -1 : 1;
+                    this.myCube.rotation.y = -this.arg * Math.PI / 360;
+                }
+                TowerManager.CheckFall(this.myCube);
+                if(this.myCube !== undefined)
+                    this.CheckSite();
+            }
+        },
+        Reset : function () {
+            this.myCube = undefined;
+            this.arg = 0;
+            this.speed = 0;
+            this.h_speed = 0;
+            this.canUse = true;
+        },
+        CheckSite : function () {
+            if(this.myCube.position.z < 10 * TotalHeight - 35){
+                scene.remove(this.myCube);
+                this.Reset();
+                GenerateManager.GenerateCube();
+            }
+        }
+    };
+
+    let TowerManager = {
+        Building : [],
+        score : [],
+        CheckFall : function (fallingCube) {
+            if(FallManager.canUse){
+                if(fallingCube.position.z < 10 * TotalHeight + 5){
+                    if(this.Building.length === 0){
+                        this.Building[0] = fallingCube;
+                        fallingCube.position.z = 5;
+                        TotalHeight += 1;
+                        camera.position.z += 10;
+                        planeWall.position.z += 10;
+                        FallManager.Reset();
+                        GenerateManager.GenerateCube();
+                    } else {
+                        if(Math.abs(fallingCube.position.x
+                                - this.Building[this.Building.length - 1].position.x) >= 10){
+                            FallManager.canUse = false;
+                        } else if (Math.abs(fallingCube.position.x
+                                - this.Building[this.Building.length - 1].position.x) < 5) {
+                            let distance = Math.floor(fallingCube.position.x
+                                - this.Building[this.Building.length - 1].position.x);
+                            distance += distance < 0 ? 1 : 0;
+                            fallingCube.position.x = this.Building[this.Building.length - 1].position.x
+                                + distance;
+                            this.Building[this.Building.length] = fallingCube;
+                            fallingCube.position.z = 10 * TotalHeight + 5;
+                            TotalHeight += 1;
+                            camera.position.z += 10;
+                            planeWall.position.z += 10;
+                            FallManager.Reset();
+                            GenerateManager.GenerateCube();
+                        } else {
+                            this.Damage(this.Building.length - 1);
+                            GenerateManager.GenerateCube();
+                        }
+                    }
+                }
+            } else {
+                let floor = Math.floor((fallingCube.position.z - 5) / 10);
+                if(floor < this.Building.length && floor >= 0
+                    && Math.abs(this.Building[floor].position.x - fallingCube.position.x) < 10
+                    && Math.abs(this.Building[floor].position.z - fallingCube.position.z) < 10){
+                    this.Damage(floor);
+                    GenerateManager.GenerateCube();
+                } else if (floor + 1 < this.Building.length && floor >= -1
+                && Math.abs(this.Building[floor + 1].position.x - fallingCube.position.x) < 10
+                && Math.abs(this.Building[floor + 1].position.z - fallingCube.position.z) < 10){
+                    this.Damage(floor + 1);
+                    GenerateManager.GenerateCube();
+                }
+            }
+        },
+        Damage : function (index) {
+            if(index === 0)
+                index = 1;
+            console.log(index, this.Building.length);
+            TotalHeight -= this.Building.length - index;
+            camera.position.z -= 10 * (this.Building.length - index);
+            planeWall.position.z -= 10 * (this.Building.length - index);
+            for(let i = index; i < this.Building.length; ++i)
+                scene.remove(this.Building[i]);
+            this.Building.splice(index, this.Building.length - index);
+            scene.remove(FallManager.myCube);
+            FallManager.Reset();
+        },
+        CalculateScore : function () {
+
+        },
+        Reset : function () {
+            for(let i = 0; i < this.Building.length; ++i)
+                scene.remove(this.Building[i]);
+            this.Building = [];
+            this.score = [];
         }
     };
 
     function animate() {
         GenerateManager.move();
-
+        FallManager.move();
         render();
         requestAnimationFrame( animate );
     }
@@ -137,7 +251,7 @@
 
     window.onkeydown = function (event) {
         if(InBuild){
-            if(37 <= event.keyCode <= 40){
+            if(37 <= event.keyCode && event.keyCode <= 40){
                 // planeWall.position.z += 100;
                 switch (event.keyCode){
                     case 37:
@@ -152,6 +266,14 @@
                     case 40:
                         camera.position.z -= 10;
                         break;
+                }
+            } else if(event.keyCode === 32) {
+                if(GenerateManager.myCube !== undefined){
+                    FallManager.myCube = GenerateManager.myCube;
+                    FallManager.arg = GenerateManager.arg;
+                    FallManager.speed = (0.2 - Math.abs(GenerateManager.arg / 150))
+                        * (GenerateManager.point ? 1 : -1);
+                    GenerateManager.Reset();
                 }
             }
         }
