@@ -185,6 +185,8 @@
         CheckSite : function () {
             if(this.myCube.position.z < 10 * TotalHeight - 35){
                 scene.remove(this.myCube);
+                if(ComboManager.comboTime > 0)
+                    ComboManager.EndCombo();
                 this.Reset();
                 if (!LifeManager.loseLife()){
                     GenerateManager.GenerateCube();
@@ -229,6 +231,8 @@
                             FallManager.Reset();
                             GenerateManager.GenerateCube();
                         } else {
+                            if(ComboManager.comboTime > 0)
+                                ComboManager.EndCombo();
                             this.Damage(this.Building.length - 1);
                             if (!LifeManager.loseLife()){
                                 GenerateManager.GenerateCube();
@@ -241,13 +245,17 @@
                 if(floor < this.Building.length && floor >= 0
                     && Math.abs(this.Building[floor].position.x - fallingCube.position.x) < 10
                     && Math.abs(this.Building[floor].position.z - fallingCube.position.z) < 10){
+                    if(ComboManager.comboTime > 0)
+                        ComboManager.EndCombo();
                     this.Damage(floor);
                     if (!LifeManager.loseLife()){
                         GenerateManager.GenerateCube();
                     }
                 } else if (floor + 1 < this.Building.length && floor >= -1
-                && Math.abs(this.Building[floor + 1].position.x - fallingCube.position.x) < 10
-                && Math.abs(this.Building[floor + 1].position.z - fallingCube.position.z) < 10){
+                    && Math.abs(this.Building[floor + 1].position.x - fallingCube.position.x) < 10
+                    && Math.abs(this.Building[floor + 1].position.z - fallingCube.position.z) < 10){
+                    if(ComboManager.comboTime > 0)
+                        ComboManager.EndCombo();
                     this.Damage(floor + 1);
                     if (!LifeManager.loseLife()){
                         GenerateManager.GenerateCube();
@@ -268,9 +276,10 @@
             planeWall.position.z -= 10 * (this.Building.length - index);
             for(let i = index; i < this.Building.length; ++i){
                 scene.remove(this.Building[i]);
-                TotalHeight -= this.score[i];
+                TotalPeople -= this.score[i];
             }
             this.Building.splice(index, this.Building.length - index);
+            this.score.splice(index, this.Building.length - index);
             scene.remove(FallManager.myCube);
             FallManager.Reset();
         },
@@ -281,7 +290,7 @@
                 TotalPeople += Math.floor((isGolden ? GoldenPeople[mode - 1] : RoofPeople[mode - 1]) *
                     (1 - distance / 5));
             } else {
-                let type = 4 - distance;
+                let type = 4 - Math.abs(distance);
                 if(type === 2 || type === 1)
                     type = 2;
                 else if (type === 0)
@@ -289,6 +298,7 @@
                 else if(type === -1)
                     type = 0;
                 let score = type + Math.floor(TotalHeight / 10);
+                console.log(score, type, Math.floor(TotalHeight / 10));
                 this.score.push(score);
                 TotalPeople += score;
             }
