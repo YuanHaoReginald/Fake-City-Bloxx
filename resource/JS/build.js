@@ -381,6 +381,7 @@
         EndCombo : function () {
             clearInterval(this.comboInterval);
             TotalPeople += this.comboScore;
+            MaxCombo = Math.max(MaxCombo, this.comboNumber);
             this.Paint(true);
             this.Reset();
         }
