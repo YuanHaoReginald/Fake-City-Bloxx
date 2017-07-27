@@ -16,6 +16,8 @@
     let combo_ctx = combo_c.getContext('2d');
     let height_c = window.document.getElementById("HeightCanvas");
     let height_ctx = height_c.getContext('2d');
+    let people_c = window.document.getElementById("PeopleCanvas");
+    let people_ctx = people_c.getContext('2d');
 
     const CubeColor = ["#EEAD0E", "#00BFFF", "#FF3030", "#00EE00", "#EEEE00"];
 
@@ -294,6 +296,7 @@
             for(let i = index; i < this.Building.length; ++i){
                 scene.remove(this.Building[i]);
                 TotalPeople -= this.score[i];
+                PeopleManager.Paint();
             }
             this.Building.splice(index, this.Building.length - index);
             this.score.splice(index, this.Building.length - index);
@@ -306,6 +309,7 @@
                 const GoldenPeople = [68, 132, 196, 260];
                 TotalPeople += Math.floor((isGolden ? GoldenPeople[mode - 1] : RoofPeople[mode - 1]) *
                     (1 - distance / 5));
+                PeopleManager.Paint();
             } else {
                 let type = 4 - Math.abs(distance);
                 if(type === 2 || type === 1)
@@ -318,6 +322,7 @@
                 console.log(score, type, Math.floor(TotalHeight / 10));
                 this.score.push(score);
                 TotalPeople += score;
+                PeopleManager.Paint();
             }
         },
         Reset : function () {
@@ -429,6 +434,7 @@
         EndCombo : function () {
             clearInterval(this.comboInterval);
             TotalPeople += this.comboScore;
+            PeopleManager.Paint();
             MaxCombo = Math.max(MaxCombo, this.comboNumber);
             this.Paint(true);
             this.Reset();
@@ -461,7 +467,18 @@
             height_ctx.fillStyle = "#000000";
             height_ctx.font = String(RectLength) + "px Arial";
             height_ctx.fillText(TotalHeight.toString(), RectLength,
-                height_c.height - 8 * RectLength)
+                height_c.height - 7.5 * RectLength)
+        }
+    };
+
+    let PeopleManager = {
+        Paint : function () {
+            people_ctx.clearRect(0, 0, people_c.width, people_c.height);
+            let RectLength = height_c.height / 30;
+            people_ctx.fillStyle = "#000000";
+            people_ctx.font = String(RectLength) + "px Arial";
+            people_ctx.fillText("People  " + TotalPeople.toString(), people_c.width - 7 * RectLength,
+                people_c.height - 2 * RectLength)
         }
     };
 
@@ -475,6 +492,8 @@
         combo_c.height = height;
         height_c.width = width;
         height_c.height = height;
+        people_c.width = width;
+        people_c.height = height;
     }
     
     function PaintRect(ctx, x, y, width, height, fill) {
@@ -542,12 +561,14 @@
         LifeManager.Paint();
         ComboManager.Paint();
         HeightManager.Paint();
+        PeopleManager.Paint();
         render();
     }
     EnvironmentManager.threeStart();
     ResizeScreen();
     LifeManager.Paint();
     HeightManager.Paint();
+    PeopleManager.Paint();
 
     function generateTexture(color) {
         let canvas = document.createElement( 'canvas' );

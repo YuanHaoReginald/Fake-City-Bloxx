@@ -21,14 +21,6 @@ div#canvas-frame {
     position: absolute;
 }
 
-#LifeCanvas {
-    z-index: 5;
-}
-
-#ComboCanvas{
-    z-index: 5;
-}
-
-#HeightCanvas{
+#LifeCanvas, #ComboCanvas, #HeightCanvas, #PeopleCanvas{
     z-index: 5;
 }
