@@ -13,13 +13,24 @@ html,body {
 #frame{
 	background-color: #87CEFA;
 	position: absolute;
-	height: 60%;
-	width: 20%;
-	top: 20%; 
-	left: 40%; 
+	top:50%;
+	left:50%;
 	border: 2px solid #000000;
 	z-index: 1;
 }
+
+#mainCanvas{
+	background: linear-gradient(white, #87CEFA);
+}
+
+.canv{
+	position: absolute;
+	top:50%;
+	left:50%;
+	border: 2px solid #000000; 
+	z-index: 1; 
+}
+
 
 #title{
 	margin-top:40%;
@@ -40,11 +51,39 @@ html,body {
 	font-size: 1.5vw;
 }
 
-#info{
+.info{
 	position:absolute;
+	font-size: 1.5vw;
+}
+
+.canvasInfo{
+	background-color:white;
+	position:absolute;
+	height:20%;
+	width:100%;
+	font-size: 1.5vw;
+	bottom:0;
+	z-index:2;
+}
+
+#extraInfo{
+
 }
 
 #foot{
 	position:absolute;
+	font-size: 1vw;
 	bottom: 0;
+}
+
+#score{
+	font-size: 1.5vw;
+}
+
+#groundCanvas, #levelCanvas, #populationCanvas{
+	z-index:2;
+}
+
+#prepareCanvas{
+	z-index:3;
 }
