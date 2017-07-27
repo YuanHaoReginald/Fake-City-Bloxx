@@ -324,10 +324,11 @@
         },
         Paint : function (clear) {
             combo_ctx.clearRect(0, 0, combo_c.width, combo_c.height);
-            if(clear === true)
+            if(clear === true || this.comboTime <= 0)
                 return;
             let width = combo_c.height / 3;
-            let height = combo_c.height / 30;
+            width = width > (combo_c.width / 2) ? combo_c.width / 2 : width;
+            let height = width / 10;
             let real_width = width * (this.comboTime > 0 ? this.comboTime : 0) / 7000;
             // console.log(real_width);
             combo_ctx.fillStyle = "#FFFF00";
@@ -440,6 +441,7 @@
         renderer.setSize( window.innerWidth, window.innerHeight );
         ResizeScreen();
         LifeManager.Paint();
+        ComboManager.Paint();
         render();
     }
     EnvironmentManager.threeStart();
