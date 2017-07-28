@@ -7,6 +7,7 @@ let width = 0;
 let height = 0;
 
 let colors=['blue', 'red', 'green', 'yellow'];
+let houses=['商业摩天楼','办公摩天楼','豪华摩天楼','住宅摩天楼'];
 
 //画布定义
 let mainCv = document.getElementById("mainCanvas").getContext('2d');
@@ -188,7 +189,14 @@ function cityBuild(city){
 
 cityBuild.prototype ={
 	constructor:cityBuild,
+
+	alert:function(str){
+		this.alerting = true;
+		document.getElementById("text").innerHTML = str+"<br />按下空格键继续";
+	},
+
 	levelChange:function(){
+		let isLvUp = false;
 		let lv = [0, 75, 150, 250, 400, 600, 800, 1000, 1400, 1800, 2200, 3000, 4000, 5000, 6500, 8000, 9500, 11500, 14000, 17000, 19000];
 		let i = -1;
 		while(i < 20){
@@ -200,9 +208,11 @@ cityBuild.prototype ={
 			} 
 		}
 		if(i > this.cityLevel){
+			isLvUp = true;
 			//this.alert("恭喜您！城市升级到了"+i+"级城市！距离超大城市的梦想又近了一步！");
 		}
 		this.cityLevel = i;
+		return isLvUp;
 	},
 	getDrawPosition:function(posX, posY, type){
 		let arr = [];
@@ -313,7 +323,9 @@ cityBuild.prototype ={
 	},
 
 	infoRepaint:function(){
-		document.getElementById("text").innerHTML = this.currentInfo();
+		if(this.alerting === false){
+			document.getElementById("text").innerHTML = this.currentInfo();
+		}
 	},
 	leftRepaint:function(){
 		leftCv.clearRect(0, 0, width, height);
@@ -358,7 +370,7 @@ cityBuild.prototype ={
 		}
 	},
 	levelRepaint:function(){
-		this.levelChange();
+		this.levelChange();//可能会有隐藏bug？
 		levelCv.clearRect(0, 0, width, height);
 		levelCv.font = height * 0.03 +"px Arial";
 		levelCv.fillStyle="white";
@@ -493,7 +505,7 @@ cityBuild.prototype ={
 	},
 	//判断当前下方文字
 	currentInfo:function(){
-		let strArr=["住宅楼：可建造在任何位置","商务楼：必须与住宅楼相邻","办公楼：必须与住宅楼和商务楼相邻","摩天大楼：必须与上述三种楼相邻"];
+		let strArr=[houses[0]+"：可建造在任何位置",houses[1]+"：必须与"+houses[0]+"相邻",houses[2]+"：必须与"+houses[0]+"和"+houses[1]+"相邻",houses[3]+"：必须与上述三种楼相邻"];
 		let wrongArr=["","达到250人口后解锁建造","达到800人口后解锁建造","达到2200人口后解锁建造"];
 		let addArr=["挑战：70人口","挑战：250人口","挑战：650人口","挑战：1000人口"];
 		if(gameStatus === 1){
@@ -545,15 +557,25 @@ cityBuild.prototype ={
 		else{
 			if(this.setAble(this.currX, this.currY, this.currHouse) === true){
 				let house = new Object();
+				let str = "";
 				house.people = this.currPeople;
 				house.type = this.currHouse;
 				house.isGood = this.isGood;
 				house.isGold = this.isGold;
+				let formerAble = this.currentAble();
+				let formerChallenge = this.challengeAble();
 				if(this.arr[this.currX][this.currY]== null){
 					this.total += this.currPeople;
+					str += "城市的总人口增加了"+this.currPeople;
 				}
 				else{
-					this.total = this.total + this.currPeople - this.arr[this.currX][this.currY].people;
+					let formerPeople = this.arr[this.currX][this.currY].people;
+					if(this.currPeople >= formerPeople){
+						str += "城市的总人口增加了"+(this.currPeople-formerPeople);
+					}else{
+						str += "城市的总人口减少了"+(formerPeople-this.currPeople);
+					}
+					this.total = this.total + this.currPeople - formerPeople;
 				}
 				this.arr[this.currX][this.currY] = house;
 				this.currX = 0;
@@ -561,6 +583,21 @@ cityBuild.prototype ={
 				this.currHouse = 0;
 				this.currPeople = 0;
 				gameStatus = 1;
+				if(this.levelChange() === true){
+					str += "<br /> 恭喜您！城市升级到了第"+this.cityLevel+"级城市！";
+					if(this.cityLevel === 20){
+						str += "您已成功实现超大城市的梦想！！！祝贺您！";
+					}else{
+						str += "您离超大城市的梦想更近了一步！";
+					}
+				}
+				if(this.currentAble() > formerAble){
+					str += "<br />恭喜您！您已解锁"+houses[this.currentAble()]+"的建造";
+				}
+				if(this.challengeAble() > formerChallenge){
+					str += "<br />恭喜您！您已解锁"+houses[this.challengeAble()]+"的高分挑战！";
+				}
+				this.alert(str);
 				//如果有变化弹出窗口？
 				this.leftRepaint();
 				this.infoRepaint();
@@ -585,7 +622,7 @@ cityBuild.prototype ={
 		if(this.alerting == true){
 			if(key === 32){
 				this.alerting = false;
-				document.getElementById("extraInfo").setAttribute("hidden","true");
+				this.infoRepaint();
 			}
 		}
 		else{
@@ -707,6 +744,7 @@ function resize(){
 	document.getElementById("frame").style.height = height+"px";
 	document.getElementById("frame").style.marginTop = (-height / 2)+"px";
 	document.getElementById("frame").style.marginLeft = (-width / 2)+"px";
+
 	let canvArr = document.querySelectorAll(".canv");
 	for(let i = 0; i < canvArr.length; i++){
 		canvArr[i].style.width = width+"px";
