@@ -368,8 +368,8 @@
             if(TotalHeight === 10 * mode){
                 const RoofPeople = [34, 46, 68, 136];
                 const GoldenPeople = [68, 132, 196, 260];
-                TotalPeople += Math.floor((isGolden ? GoldenPeople[mode - 1] : RoofPeople[mode - 1]) *
-                    (1 - distance / 5));
+                TotalPeople += Math.floor(((isGolden && hasGolden) ? GoldenPeople[mode - 1] : RoofPeople[mode - 1]) *
+                    (1 - Math.abs(distance) / 5));
                 PeopleManager.Paint();
             } else {
                 let type = 4 - Math.abs(distance);
