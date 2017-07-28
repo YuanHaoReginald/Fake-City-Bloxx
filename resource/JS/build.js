@@ -36,7 +36,6 @@
     function EndBuildTower() {
         document.getElementById("canvas-frame").style.visibility = "hidden";
         InBuild = false;
-        // console.log("Finish Building");
         let [TotalHeight_var, TotalPeople_var, MaxCombo_var, isGolden_var]
             = [TotalHeight, TotalPeople, MaxCombo, isGolden];
         [TotalHeight, TotalPeople, MaxCombo, isGolden] = [0, 0, 0, false];
@@ -114,6 +113,7 @@
         meshFaceMaterial : undefined,
         arg : 0,
         point : true,
+        line : undefined,
         initCube : function () {
             this.geometry = new THREE.CubeGeometry(10, 10, 10);
             let texture_main = new THREE.Texture(generateTexture(CubeColor[mode]));
@@ -156,9 +156,22 @@
                 this.myCube.position.z = TotalHeight * 10 + 35;
             }
             scene.add(this.myCube);
+
+            let geometry_line = new THREE.Geometry();
+            let material_line = new THREE.LineBasicMaterial( { vertexColors: THREE.VertexColors} );
+            let color1 = new THREE.Color( 0x000000 ), color2 = new THREE.Color( 0x000000 );
+            let p1 = new THREE.Vector3(0, 0, TotalHeight * 10 + 85);
+            let p2 = new THREE.Vector3(0, 0, TotalHeight * 10 + 40);
+            geometry_line.vertices.push(p1);
+            geometry_line.vertices.push(p2);
+            geometry_line.colors.push( color1, color2 );
+            this.line = new THREE.Line( geometry_line, material_line, THREE.LineSegments );
+            scene.add(this.line);
         },
         Reset : function () {
-            // scene.remove(this.myCube);
+            if(this.line !== undefined)
+                scene.remove(this.line);
+            this.line = undefined;
             this.myCube = undefined;
             this.arg = 0;
             this.point = true;
@@ -175,6 +188,19 @@
                 }
                 this.myCube.position.x = 50 * Math.sin(this.arg * Math.PI / 360);
                 this.myCube.position.z = TotalHeight * 10 + 85 - 50 * Math.cos(this.arg * Math.PI / 360);
+
+                scene.remove(this.line);
+                let geometry_line = new THREE.Geometry();
+                let material_line = new THREE.LineBasicMaterial( { vertexColors: THREE.VertexColors} );
+                let color1 = new THREE.Color( 0x000000 ), color2 = new THREE.Color( 0x000000 );
+                let p1 = new THREE.Vector3(0, 0, TotalHeight * 10 + 85);
+                let p2 = new THREE.Vector3(45 * Math.sin(this.arg * Math.PI / 360), 0,
+                    TotalHeight * 10 + 85 - 45 * Math.cos(this.arg * Math.PI / 360));
+                geometry_line.vertices.push(p1);
+                geometry_line.vertices.push(p2);
+                geometry_line.colors.push( color1, color2 );
+                this.line = new THREE.Line( geometry_line, material_line, THREE.LineSegments );
+                scene.add(this.line);
             }
         }
     };
@@ -236,10 +262,17 @@
                         TotalHeight += 1;
                         HeightManager.Paint();
                         this.CalculateScore(5);
-                        camera.position.z += 10;
-                        planeWall.position.z += 10;
                         FallManager.Reset();
-                        GenerateManager.GenerateCube();
+                        let total_dis = 10;
+                        let temp_interval = setInterval(() => {
+                            camera.position.z += 0.25;
+                            planeWall.position.z += 0.25;
+                            total_dis -= 0.5;
+                            if(total_dis === 0){
+                                clearInterval(temp_interval);
+                                GenerateManager.GenerateCube();
+                            }
+                        }, 25);
                     } else {
                         if(Math.abs(fallingCube.position.x
                                 - this.Building[this.Building.length - 1].position.x) >= 10){
@@ -257,19 +290,26 @@
                             TotalHeight += 1;
                             HeightManager.Paint();
                             this.CalculateScore(distance);
-                            camera.position.z += 10;
-                            planeWall.position.z += 10;
                             FallManager.Reset();
-                            if(TotalHeight === mode * 10){
-                                if(ComboManager.comboTime > 0)
-                                    ComboManager.EndCombo();
-                                InBuild = false;
-                                setTimeout(() => {
-                                    EndBuildTower();
-                                }, 2000);
-                            } else {
-                                GenerateManager.GenerateCube();
-                            }
+                            let total_dis = 10;
+                            let temp_interval = setInterval(() => {
+                                camera.position.z += 0.25;
+                                planeWall.position.z += 0.25;
+                                total_dis -= 0.25;
+                                if(total_dis === 0){
+                                    clearInterval(temp_interval);
+                                    if(TotalHeight === mode * 10){
+                                        if(ComboManager.comboTime > 0)
+                                            ComboManager.EndCombo();
+                                        InBuild = false;
+                                        setTimeout(() => {
+                                            EndBuildTower();
+                                        }, 2000);
+                                    } else {
+                                        GenerateManager.GenerateCube();
+                                    }
+                                }
+                            }, 25);
                         } else {
                             if(ComboManager.comboTime > 0)
                                 ComboManager.EndCombo();
@@ -313,7 +353,6 @@
                 this.Building[index - 1].position.x){
                 index += 1;
             }
-            console.log(index, this.Building.length);
             TotalHeight -= this.Building.length - index;
             HeightManager.Paint();
             camera.position.z -= 10 * (this.Building.length - index);
@@ -344,7 +383,6 @@
                 else if(type === -1)
                     type = 0;
                 let score = type + Math.floor(TotalHeight / 10);
-                console.log(score, type, Math.floor(TotalHeight / 10));
                 this.score.push(score);
                 TotalPeople += score;
                 PeopleManager.Paint();
@@ -432,7 +470,6 @@
             width = width > (combo_c.width / 2) ? combo_c.width / 2 : width;
             let height = width / 10;
             let real_width = width * (this.comboTime > 0 ? this.comboTime : 0) / 7000;
-            // console.log(real_width);
             combo_ctx.fillStyle = "#FFFF00";
             combo_ctx.strokeStyle = "#000000";
             combo_ctx.lineWidth = 1;
@@ -551,23 +588,7 @@
 
     window.onkeydown = function (event) {
         if(InBuild){
-            if(37 <= event.keyCode && event.keyCode <= 40){
-                // planeWall.position.z += 100;
-                switch (event.keyCode){
-                    case 37:
-                        camera.position.x += 10;
-                        break;
-                    case 38:
-                        camera.position.z += 10;
-                        break;
-                    case 39:
-                        camera.position.x -= 10;
-                        break;
-                    case 40:
-                        camera.position.z -= 10;
-                        break;
-                }
-            } else if(event.keyCode === 32) {
+            if(event.keyCode === 32) {
                 if(GenerateManager.myCube !== undefined){
                     FallManager.myCube = GenerateManager.myCube;
                     FallManager.arg = GenerateManager.arg;
