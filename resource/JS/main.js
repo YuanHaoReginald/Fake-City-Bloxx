@@ -753,7 +753,6 @@
 					//TODO 界面隐藏、数据读取等部分
 					document.getElementById("open").setAttribute("hidden", "true");
 					document.getElementById("p"+this.currPos).setAttribute("class", "start");
-					document.getElementById("p"+this.minPos).setAttribute("class", "selected");
 					document.getElementById("text").removeAttribute("hidden");
 					document.getElementById("text").setAttribute("class", "canvasInfo");
 					document.getElementById("canvs").removeAttribute("hidden");
@@ -1378,6 +1377,7 @@
 		document.getElementById("frame").style.height = height+"px";
 		document.getElementById("frame").style.marginTop = (-height / 2)+"px";
 		document.getElementById("frame").style.marginLeft = (-width / 2)+"px";
+        document.getElementById("frame").style.fontSize = width*0.03 + "px";
 		let canvArr = document.querySelectorAll(".canv");
 		for(let i = 0; i < canvArr.length; i++){
 			canvArr[i].style.width = width+"px";
@@ -1434,6 +1434,7 @@
     			//特殊判断：刷新gS
     			if(key === 27){
     				gS.change();
+                    document.getElementById("p"+gS.minPos).setAttribute("class", "selected");
     			}
     		}
         }
