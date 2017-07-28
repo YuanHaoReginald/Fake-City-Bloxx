@@ -37,7 +37,7 @@
         document.getElementById("canvas-frame").style.visibility = "hidden";
         InBuild = false;
         let [TotalHeight_var, TotalPeople_var, MaxCombo_var, isGolden_var]
-            = [TotalHeight, TotalPeople, MaxCombo, isGolden];
+            = [TotalHeight, TotalPeople, MaxCombo, isGolden && hasGolden];
         [TotalHeight, TotalPeople, MaxCombo, isGolden] = [0, 0, 0, false];
         TowerManager.Reset();
         LifeManager.Paint();
