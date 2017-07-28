@@ -130,6 +130,7 @@
         },
         GenerateCube : function() {
             if(TotalHeight === mode * 10 - 1){
+                ComboManager.EndCombo();
                 let roof_geometry  = new THREE.CylinderGeometry(0, 5 * Math.sqrt(2), 10, 4);
                 let roof_materials = [];
                 const line = [70, 300, 650, 1100];
@@ -283,7 +284,8 @@
                                 + distance;
                             this.Building[this.Building.length] = fallingCube;
                             fallingCube.position.z = 10 * TotalHeight + 5;
-                            ComboManager.CheckCombo(distance === 0);
+                            if(TotalHeight !== 10 * mode - 1)
+                                ComboManager.CheckCombo(distance === 0);
                             TotalHeight += 1;
                             HeightManager.Paint();
                             this.CalculateScore(distance);
