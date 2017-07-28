@@ -1,7 +1,7 @@
 // import * as THREE from "three";
 
 // (function (window) {
-    let InBuild = true;
+    let InBuild = false;
     let renderer, camera, scene, light;
     let width = document.getElementById('canvas-frame').clientWidth;
     let height = document.getElementById('canvas-frame').clientHeight;
@@ -22,19 +22,35 @@
     const CubeColor = ["#EEAD0E", "#00BFFF", "#FF3030", "#00EE00", "#EEEE00"];
 
     function BuildTower(mode_var, isGod_var) {
-        mode = mode_var || 1;
+        mode = mode_var === undefined ? 1 : mode_var;
         isGod = (isGod_var === true);
         InBuild = true;
         GenerateManager.initCube();
         LifeManager.initLife();
         LifeManager.Paint();
+        HeightManager.Paint();
         document.getElementById("canvas-frame").style.visibility = "visible";
+        GenerateManager.GenerateCube();
     }
 
     function EndBuildTower() {
-        // document.getElementById("canvas-frame").style.visibility = "hidden";
-        console.log("Finish Building");
+        document.getElementById("canvas-frame").style.visibility = "hidden";
         InBuild = false;
+        // console.log("Finish Building");
+        let [TotalHeight_var, TotalPeople_var, MaxCombo_var, isGolden_var]
+            = [TotalHeight, TotalPeople, MaxCombo, isGolden];
+        [TotalHeight, TotalPeople, MaxCombo, isGolden] = [0, 0, 0, false];
+        TowerManager.Reset();
+        LifeManager.Paint();
+        HeightManager.Paint();
+        PeopleManager.Paint();
+        camera.position.z = 30;
+        planeWall.position.z = 500;
+        yitao(TotalHeight_var, TotalPeople_var, MaxCombo_var, isGolden_var);
+    }
+
+    function yitao(TotalHeight, TotalPeople, MaxCombo, isGolden) {
+        console.log(TotalHeight, TotalPeople, MaxCombo, isGolden);
     }
 
     let EnvironmentManager = {
@@ -119,7 +135,7 @@
             if(TotalHeight === mode * 10 - 1){
                 let roof_geometry  = new THREE.CylinderGeometry(0, 5 * Math.sqrt(2), 10, 4);
                 let roof_materials = [];
-                const line = [70, 450, 1300, 3000];
+                const line = [70, 300, 650, 1100];
                 if(TotalPeople >= line[mode - 1]){
                     isGolden = true;
                 }
@@ -244,7 +260,16 @@
                             camera.position.z += 10;
                             planeWall.position.z += 10;
                             FallManager.Reset();
-                            GenerateManager.GenerateCube();
+                            if(TotalHeight === mode * 10){
+                                if(ComboManager.comboTime > 0)
+                                    ComboManager.EndCombo();
+                                InBuild = false;
+                                setTimeout(() => {
+                                    EndBuildTower();
+                                }, 2000);
+                            } else {
+                                GenerateManager.GenerateCube();
+                            }
                         } else {
                             if(ComboManager.comboTime > 0)
                                 ComboManager.EndCombo();
@@ -365,11 +390,14 @@
                 this.Paint();
                 if(this.life === 0)
                 {
-                    EndBuildTower();
+                    InBuild = false;
+                    setTimeout(() => {
+                        EndBuildTower();
+                    }, 2000);
                     return true;
                 }
-                return false;
             }
+            return false;
         }
     };
 
