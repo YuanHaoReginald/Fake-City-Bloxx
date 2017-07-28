@@ -1,5 +1,4 @@
 (function (window) {
-
     //below is Building Code
     let InBuild = false;
     let renderer, camera, scene, light;
