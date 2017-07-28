@@ -7,7 +7,7 @@
     let TotalHeight = 0, MaxCombo = 0, TotalPeople = 0;
     let mode, isGod;
     let planeFloor, planeWall;
-    let isGolden = false;
+    let isGolden = false, hasGolden = false;
 
     let life_c = window.document.getElementById("LifeCanvas");
     let life_ctx = life_c.getContext('2d');
@@ -20,9 +20,10 @@
 
     const CubeColor = ["#EEAD0E", "#00BFFF", "#FF3030", "#00EE00", "#EEEE00"];
 
-    function BuildTower(mode_var, isGod_var) {
+    function BuildTower(mode_var, hasGolden_var, isGod_var) {
         mode = mode_var === undefined ? 1 : mode_var;
         isGod = (isGod_var === true);
+        hasGolden = hasGolden_var;
         InBuild = true;
         GenerateManager.initCube();
         LifeManager.initLife();
@@ -44,6 +45,7 @@
         PeopleManager.Paint();
         camera.position.z = 30;
         planeWall.position.z = 500;
+        hasGolden = false;
         yitao(TotalHeight_var, TotalPeople_var, MaxCombo_var, isGolden_var);
     }
 
@@ -134,7 +136,7 @@
                 if(TotalPeople >= line[mode - 1]){
                     isGolden = true;
                 }
-                if(isGolden){
+                if(hasGolden && isGolden){
                     roof_materials.push(new THREE.MeshBasicMaterial({color: '#FFD700'}));
                 } else {
                     roof_materials.push(new THREE.MeshBasicMaterial({color: CubeColor[mode]}));
