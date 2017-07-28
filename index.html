@@ -43,9 +43,18 @@
 		<canvas id="houseCanvas" class="canv"></canvas>
 		<canvas id="prepareCanvas" class="canv"></canvas>
 	</div>
+	<div id="canvas-frame">
+		<canvas id="LifeCanvas" class="GameCanvas" width="2434" height="1260"></canvas>
+		<canvas id="ComboCanvas" class="GameCanvas" width="2434" height="1260"></canvas>
+		<canvas id="HeightCanvas" class="GameCanvas" width="2434" height="1260"></canvas>
+		<canvas id="PeopleCanvas" class="GameCanvas" width="2434" height="1260"></canvas>
+	</div>
+    <script>
+        document.getElementById("canvas-frame").style.visibility = "hidden";
+    </script>
 </body>
-
 <footer>
+    <script src="./resource/JS/three.js"></script>
     <script src="./resource/JS/main.js" type="text/javascript"></script>
 </footer>
 </html>
