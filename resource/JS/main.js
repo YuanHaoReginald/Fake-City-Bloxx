@@ -46,7 +46,7 @@
         camera.position.z = 30;
         planeWall.position.z = 500;
         hasGolden = false;
-        yitao(TotalHeight_var, TotalPeople_var, MaxCombo_var, isGolden_var);
+        translate(TotalHeight_var, TotalPeople_var, MaxCombo_var, isGolden_var);
     }
 
     let EnvironmentManager = {
@@ -624,10 +624,9 @@
 
     let formerPos = 0;//(0表示是从city建造，1表示是从quickgame建造)
 	//开始页面设置的类，绑定基础的视图
-	function gameStart(canv){
+	function gameStart(){
 		this.currStatus = 0;//0表示正在首页，1表示正在查看帮助,2表示正在查看高分榜
 		this.currPos = 0;//当前如果处于开始界面的光标位置
-		this.canvas = canv;//可能存在的画布
 		this.minPos = 0;
 		this.change();
 	}
@@ -635,15 +634,14 @@
 	gameStart.prototype={
 		constructor:gameStart,
         reNew:function(TotalHeight, TotalPeople,MaxCombo){
-            //TODO展示结果
+            //接收建造返回的结果，并且准备显示
             document.getElementById("frame").removeAttribute("hidden");
             document.getElementById("text").removeAttribute("hidden");
             document.getElementById("foot").removeAttribute("hidden");
             document.getElementById("open").setAttribute("hidden", "true");
             document.getElementById("text").innerHTML = "人口总数："+TotalPeople+"<br />楼房高度："+TotalHeight+"<br />最大连击数："+MaxCombo;
-            //从建造处获取本次快速建造的成绩
             gameStatus = 0;
-             //更新高分榜
+             //localStorage选择更新高分榜
             let qStr = localStorage.getItem("quickScores");
             let qS = JSON.parse(qStr);
             if(qS == undefined){
@@ -752,7 +750,7 @@
 					
 				}
 				else {
-					//TODO 界面隐藏、数据读取等部分
+					// 界面隐藏、数据读取等部分
 					document.getElementById("open").setAttribute("hidden", "true");
 					document.getElementById("p"+this.currPos).setAttribute("class", "start");
 					document.getElementById("text").removeAttribute("hidden");
@@ -794,7 +792,7 @@
 		this.currY = 0;
 		this.currPeople = 0;//建造好之后房屋的人口数量
 		this.isCancelled = false;//建造好之后是否处于删除位置
-		this.cityLevel = 0;
+		this.cityLevel = 0;//当前城市等级0-20
 		this.isGood = false;//是否拥有屋顶
 		this.isGold = false;//是否拥有金屋顶；
 		this.initPaint();//进行初始界面的绘制。之后的重绘只需要重绘部分内容
@@ -822,7 +820,6 @@
             }
             if(i > this.cityLevel){
                 isLvUp = true;
-                //this.alert("恭喜您！城市升级到了"+i+"级城市！距离超大城市的梦想又近了一步！");
             }
             this.cityLevel = i;
             return isLvUp;
@@ -934,12 +931,13 @@
             }
             return i;
         },
-
+        //下方信息栏绘制（html）
         infoRepaint:function(){
             if(this.alerting === false){
                 document.getElementById("text").innerHTML = this.currentInfo();
             }
         },
+        //左边栏绘制
         leftRepaint:function(){
             leftCv.clearRect(0, 0, width, height);
             if(gameStatus === 1){
@@ -1059,6 +1057,7 @@
                 }
             }
         },
+        //准备放置部分的绘制
         prepareRepaint:function(){
             prepareCv.clearRect(0, 0, width, height);
             if(gameStatus === 2){
@@ -1096,7 +1095,7 @@
             }
             return i;
         },
-        //判断对应的位置是否与某一个位置相连
+        //判断对应的位置是否与某一种楼房相连
         isAdj:function(posX, posY, type){
             let dx = [1, -1, 0, 0];
             let dy = [0, 0, 1, -1];
@@ -1116,7 +1115,7 @@
             }
             return true;
         },
-        //判断当前下方文字
+        //判断当前下方文字提示
         currentInfo:function(){
             let strArr=[houses[0]+"：可建造在任何位置",houses[1]+"：必须与"+houses[0]+"相邻",houses[2]+"：必须与"+houses[0]+"和"+houses[1]+"相邻",houses[3]+"：必须与上述三种楼相邻"];
             let wrongArr=["","达到250人口后解锁建造","达到800人口后解锁建造","达到2200人口后解锁建造"];
@@ -1265,7 +1264,7 @@
                         }
                     }
                     if(key === 32){
-                        //TODO 转入建造模式
+                        // 转入建造模式
                         if(this.currHouse <= this.currentAble()){
                             let isAble = false;
                             for(let i = 0; i < 5; i++){
@@ -1337,25 +1336,10 @@
             this.initPaint();
         }
     } 
-	//返回一个二元数组，第一个元素存放人口总数，第二个元素存放楼层层数
-	function game(type){
-		//TODO
-		if(type === 0){
-			return [100, 10, 0, 0];
-		}else if(type === 1){
-			return [250,19, 0,0];
-		}
-		else if (type === 2){
-			return [550,30,0,1];
-		}
-		else if(type === 3){
-			return [1000,39, 0,0];
-		}
-	}
 
 	gS = new gameStart();
 
-    function yitao(TotalHeight, TotalPeople, MaxCombo, isGolden) {
+    function translate(TotalHeight, TotalPeople, MaxCombo, isGolden) {
         if(formerPos === 0){
             gS.city.setValue(TotalHeight, TotalPeople, MaxCombo,isGolden);
         }else if(formerPos === 1){
@@ -1363,7 +1347,7 @@
         }
     }
 
-	//TODO:屏幕适配：页面宽度设置
+	//屏幕适配：页面宽度设置，进行各种元素的调整
 	function resize(){
 		let screenWidth = document.body.offsetWidth;
 		let screenHeight = document.body.offsetHeight;
