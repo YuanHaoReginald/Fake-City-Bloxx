@@ -132,7 +132,7 @@
             if(TotalHeight === mode * 10 - 1){
                 let roof_geometry  = new THREE.CylinderGeometry(0, 5 * Math.sqrt(2), 10, 4);
                 let roof_materials = [];
-                const line = [70, 300, 650, 1100];
+                const line = [70, 250, 550, 1000];
                 if(TotalPeople >= line[mode - 1]){
                     isGolden = true;
                 }
@@ -746,7 +746,7 @@
 					document.getElementById("p"+this.minPos).setAttribute("class", "selected");
 					gameStatus = 3;
                     formerPos = 1;
-					let result = BuildTower(0, false);
+					let result = BuildTower(0, false,false);
 					
 				}
 				else {
@@ -1279,7 +1279,11 @@
                                 document.getElementById("frame").setAttribute("hidden", "true");
                                 document.getElementById("canvs").setAttribute("hidden", "true");
                                 formerPos = 0;
-                                let result = BuildTower(this.currHouse + 1, false);
+                                let isChallenge = false;
+                                if(this.currHouse <= this.challengeAble()){
+                                    isChallenge = true;
+                                }
+                                let result = BuildTower(this.currHouse + 1, isChallenge, false);
                             }
                         }
                     }
