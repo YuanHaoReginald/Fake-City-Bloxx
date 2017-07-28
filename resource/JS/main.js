@@ -130,6 +130,7 @@
         },
         GenerateCube : function() {
             if(TotalHeight === mode * 10 - 1){
+                ComboManager.EndCombo();
                 let roof_geometry  = new THREE.CylinderGeometry(0, 5 * Math.sqrt(2), 10, 4);
                 let roof_materials = [];
                 const line = [70, 250, 550, 1000];
@@ -283,7 +284,8 @@
                                 + distance;
                             this.Building[this.Building.length] = fallingCube;
                             fallingCube.position.z = 10 * TotalHeight + 5;
-                            ComboManager.CheckCombo(distance === 0);
+                            if(TotalHeight !== 10 * mode - 1)
+                                ComboManager.CheckCombo(distance === 0);
                             TotalHeight += 1;
                             HeightManager.Paint();
                             this.CalculateScore(distance);
@@ -368,8 +370,8 @@
             if(TotalHeight === 10 * mode){
                 const RoofPeople = [34, 46, 68, 136];
                 const GoldenPeople = [68, 132, 196, 260];
-                TotalPeople += Math.floor((isGolden ? GoldenPeople[mode - 1] : RoofPeople[mode - 1]) *
-                    (1 - distance / 5));
+                TotalPeople += Math.floor(((isGolden && hasGolden) ? GoldenPeople[mode - 1] : RoofPeople[mode - 1]) *
+                    (1 - Math.abs(distance) / 5));
                 PeopleManager.Paint();
             } else {
                 let type = 4 - Math.abs(distance);
