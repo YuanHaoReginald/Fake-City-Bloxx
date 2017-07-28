@@ -3,8 +3,8 @@
 // (function (window) {
     let InBuild = false;
     let renderer, camera, scene, light;
-    let width = document.getElementById('canvas-frame').clientWidth;
-    let height = document.getElementById('canvas-frame').clientHeight;
+    let width_3d_use = document.getElementById('canvas-frame').clientWidth;
+    let height_3d_use = document.getElementById('canvas-frame').clientHeight;
     let TotalHeight = 0, MaxCombo = 0, TotalPeople = 0;
     let mode, isGod;
     let planeFloor, planeWall;
@@ -57,12 +57,12 @@
             renderer = new THREE.WebGLRenderer({
                 alpha : true,
             });
-            renderer.setSize(width, height);
+            renderer.setSize(width_3d_use, height_3d_use);
             document.getElementById('canvas-frame').appendChild(renderer.domElement);
             renderer.domElement.style.zIndex = 0;
         },
         initCamera : function() {
-            camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+            camera = new THREE.PerspectiveCamera(45, width_3d_use / height_3d_use, 1, 10000);
             camera.position.x = 0;
             camera.position.y = 150;
             camera.position.z = 30;

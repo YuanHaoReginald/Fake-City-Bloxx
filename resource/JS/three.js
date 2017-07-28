@@ -19709,7 +19709,7 @@ THREE.LensFlare.prototype.add = function ( texture, size, distance, blending, co
 
 	this.lensFlares.push( {
 		texture: texture,	// THREE.Texture
-		size: size, 		// size in pixels (-1 = use texture.width)
+		size: size, 		// size in pixels (-1 = use texture.width_3d_use)
 		distance: distance, 	// distance (0-1) from light source (0=at light source)
 		x: 0, y: 0, z: 0,	// screen position (-1 => 1) z = 0 is in front z = 1 is back
 		scale: 1, 		// scale
@@ -24313,7 +24313,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 		/* For some reason this is not working. Defaulting to RGBA4.
 		} else if ( ! renderTarget.depthBuffer && renderTarget.stencilBuffer ) {
 
-			_gl.renderbufferStorage( _gl.RENDERBUFFER, _gl.STENCIL_INDEX8, renderTarget.width, renderTarget.height );
+			_gl.renderbufferStorage( _gl.RENDERBUFFER, _gl.STENCIL_INDEX8, renderTarget.width_3d_use, renderTarget.height_3d_use );
 			_gl.framebufferRenderbuffer( _gl.FRAMEBUFFER, _gl.STENCIL_ATTACHMENT, _gl.RENDERBUFFER, renderbuffer );
 		*/
 
